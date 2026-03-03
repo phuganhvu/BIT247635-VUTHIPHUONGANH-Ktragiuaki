@@ -1,0 +1,14 @@
+
+public static double calculateAverageGPA(List<Student> students) {
+
+    if (students == null || students.isEmpty()) {
+        throw new IllegalArgumentException("Danh sách sinh viên rỗng!");
+    }
+
+    double sum = 0;
+    for (Student s : students) {
+        sum += s.getGpa();
+    }
+
+    return sum / students.size();
+}
