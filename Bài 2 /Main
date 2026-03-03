@@ -1,0 +1,58 @@
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        StudentManager<Student> manager = new StudentManager<>();
+
+        manager.add(new Student("S01", "An", 3.5));
+        manager.add(new Student("S02", "Binh", 3.8));
+        manager.add(new Student("S03", "Chi", 3.2));
+
+        System.out.println("Bắt đầu tính GPA trung bình...");
+
+        // Xử lý bất đồng bộ
+        CompletableFuture<Double> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                // Giả lập xử lý nặng
+                Thread.sleep(1000);
+                return calculateAverageGPA(manager.getAll());
+            } catch (Exception e) {
+                throw new RuntimeException("Lỗi khi tính GPA", e);
+            }
+        });
+
+        // Xử lý khi hoàn tất
+        future.thenAccept(avg -> {
+            System.out.println("Điểm trung bình GPA của hệ thống là: " + avg);
+        }).exceptionally(ex -> {
+            System.out.println("Đã xảy ra lỗi: " + ex.getMessage());
+            return null;
+        });
+
+        System.out.println("Luồng chính vẫn tiếp tục chạy...");
+
+        // Chỉ để demo (nếu không chương trình có thể kết thúc trước khi async xong)
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static double calculateAverageGPA(List<Student> students) {
+
+        if (students == null || students.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách sinh viên rỗng!");
+        }
+
+        double sum = 0;
+        for (Student s : students) {
+            sum += s.getGpa();
+        }
+
+        return sum / students.size();
+    }
+}
